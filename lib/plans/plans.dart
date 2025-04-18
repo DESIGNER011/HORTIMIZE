@@ -126,8 +126,7 @@ class _PlansPageState extends State<PlansPage> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => HeroPage()),
-                (route) =>
-                    false, // This removes all previous routes from the stack
+                (route) => false,
               );
               Navigator.push(
                   context, MaterialPageRoute(builder: (context) => Climate()));
