@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "667322423972",
+    "project_id": "hortimize",
+    "storage_bucket": "hortimize.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:667322423972:android:e079cbe4d0cd35a0632431",
+        "android_client_info": {
+          "package_name": "com.example.hortimize"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "667322423972-qgp65k8luet07ospdgfjstufls7v9c50.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hortimize",
+            "certificate_hash": "72a52e35a62e522b643694ae03de40a1b101167d"
+          }
+        },
+        {
+          "client_id": "667322423972-i7b5sd8531jiqqkq3vp1j9bsqrol9b0q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhSd8sKzcrZEXijsGylZjrpMDw0z_ohqY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "667322423972-i7b5sd8531jiqqkq3vp1j9bsqrol9b0q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "667322423972-b073ds2ful2okrs3behb3cae5rtaqgao.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.hortimize"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

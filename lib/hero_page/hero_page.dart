@@ -4,17 +4,22 @@ import 'package:hortimize/market_demand/market_demand.dart';
 import 'package:hortimize/notification/notifi_page.dart';
 import 'package:hortimize/plans/plans.dart';
 import 'package:hortimize/profile/profile.dart';
+import 'package:hortimize/services/auth_service.dart';
+import 'package:hortimize/auth/auth_wrapper.dart';
+import 'dart:async';  // Add this import for TimeoutException
 
 class HeroPage extends StatelessWidget {
   const HeroPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final AuthService _authService = AuthService();
+    
     return Scaffold(
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image:
                 AssetImage("asset/images/homescreen.jpeg"), // Background Image
@@ -35,7 +40,7 @@ class HeroPage extends StatelessWidget {
                     Container(
                       width: 50, // Circle size
                       height: 50,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         shape: BoxShape.circle, // Makes it circular
                         image: DecorationImage(
                           image: AssetImage('asset/images/logo.png'),
@@ -43,8 +48,8 @@ class HeroPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Text(
+                    const SizedBox(width: 10),
+                    const Text(
                       "Hortimize",
                       style: TextStyle(
                         fontFamily: "Poppins",
@@ -53,20 +58,20 @@ class HeroPage extends StatelessWidget {
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     InkWell(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ProfilePage(),
+                            builder: (context) => const ProfilePage(),
                           ),
                         );
                       },
                       child: Container(
                         width: 50, // Circle size
                         height: 50,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle, // Makes it circular
                           image: DecorationImage(
                             image: AssetImage('asset/images/profile.png'),
@@ -84,10 +89,10 @@ class HeroPage extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 15),
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.9,
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                         top: 10, left: 30, right: 30, bottom: 10),
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(178, 182, 198, 177),
+                      color: const Color.fromARGB(178, 182, 198, 177),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -100,8 +105,8 @@ class HeroPage extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 15),
                           child: Text(
                             "Home",
                             style:
@@ -114,49 +119,47 @@ class HeroPage extends StatelessWidget {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          MarketDemandPage()));
+                                          const MarketDemandPage()));
                             },
                             child: _buildRectangleBox("Marketing demands")),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         InkWell(
                           onTap: () {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => PlansPage(),
+                                  builder: (context) => const PlansPage(),
                                 ));
                           },
                           child: _buildRectangleBox("Plans"),
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         InkWell(
                           onTap: () {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => Climate(),
+                                  builder: (context) => const Climate(),
                                 ));
                           },
                           child: _buildRectangleBox("Climate"),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => NotifiPage()));
+                                    builder: (context) => const NotifiPage()));
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff7cc8a6), // Button color
-                            // padding: EdgeInsets.symmetric(
-                            //     horizontal: 150, vertical: 12),
+                            backgroundColor: const Color(0xff7cc8a6), // Button color
                             shape: RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.circular(8), // Rounded corners
                             ),
                           ),
-                          child: Center(
+                          child: const Center(
                             child: Icon(
                               Icons.notifications_none,
                               size: 25,
@@ -164,11 +167,183 @@ class HeroPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        SizedBox(height: 10),
-                        Text(
+                        const SizedBox(height: 10),
+                        const Text(
                           "Notification",
                           style: TextStyle(fontFamily: "Poppins", fontSize: 20),
-                        )
+                        ),
+                        const SizedBox(height: 30),
+                        // Logout Button
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            // Show confirmation dialog
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text(
+                                    "Logout Confirmation",
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  content: Text(
+                                    "Are you sure you want to logout?",
+                                    style: TextStyle(fontFamily: "Poppins"),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); // Close dialog
+                                      },
+                                      child: Text(
+                                        "Cancel",
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontFamily: "Poppins",
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        Navigator.of(context).pop(); // Close dialog
+                                        
+                                        try {
+                                          // Show loading indicator
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (BuildContext context) {
+                                              return Dialog(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(20.0),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      CircularProgressIndicator(),
+                                                      SizedBox(width: 20),
+                                                      Text(
+                                                        "Logging out...",
+                                                        style: TextStyle(fontFamily: "Poppins"),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                          
+                                          // Set a timeout for the logout operation
+                                          bool logoutSuccess = false;
+                                          
+                                          // Perform logout with timeout
+                                          try {
+                                            await _authService.signOut()
+                                                .timeout(Duration(seconds: 5), onTimeout: () {
+                                              throw TimeoutException('Logout timed out');
+                                            });
+                                            logoutSuccess = true;
+                                          } catch (e) {
+                                            debugPrint('Logout error or timeout: $e');
+                                            // Even on error, we'll proceed with navigation
+                                            // but will show an error message
+                                          }
+                                          
+                                          // Check if context is still mounted before proceeding
+                                          if (!context.mounted) return;
+                                          
+                                          // Close loading dialog if open
+                                          if (Navigator.canPop(context)) {
+                                            Navigator.of(context).pop();
+                                          }
+                                          
+                                          if (!logoutSuccess && context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Warning: Logout encountered an issue. App state has been reset anyway.'),
+                                                backgroundColor: Colors.orange,
+                                                duration: Duration(seconds: 3),
+                                              ),
+                                            );
+                                          }
+                                          
+                                          // Always navigate to login (AuthWrapper will handle) even if 
+                                          // there was an error, as we want the user to get out
+                                          await Future.delayed(Duration(milliseconds: 300));
+                                          
+                                          // Check if context is still mounted before navigating
+                                          if (context.mounted) {
+                                            Navigator.of(context).pushAndRemoveUntil(
+                                              MaterialPageRoute(builder: (context) => AuthWrapper()),
+                                              (route) => false
+                                            );
+                                          }
+                                        } catch (e) {
+                                          // Check if context is still mounted before proceeding
+                                          if (!context.mounted) return;
+                                          
+                                          // Close loading dialog if open
+                                          if (Navigator.canPop(context)) {
+                                            Navigator.of(context).pop();
+                                          }
+                                          
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Error signing out: $e'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                          
+                                          // Even on error, try to navigate to login
+                                          try {
+                                            await Future.delayed(Duration(seconds: 1));
+                                            
+                                            // Check if context is still mounted before navigating
+                                            if (context.mounted) {
+                                              Navigator.of(context).pushAndRemoveUntil(
+                                                MaterialPageRoute(builder: (context) => AuthWrapper()),
+                                                (route) => false
+                                              );
+                                            }
+                                          } catch (navError) {
+                                            debugPrint('Navigation error: $navError');
+                                          }
+                                        }
+                                      },
+                                      child: Text(
+                                        "Logout",
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: "Poppins",
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.logout, color: Colors.white),
+                          label: const Text(
+                            "Logout",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -184,12 +359,12 @@ class HeroPage extends StatelessWidget {
   // 🔹 Function to Create a Rectangular Box
   Widget _buildRectangleBox(String text) {
     return Container(
-      margin: EdgeInsets.only(bottom: 15),
-      padding: EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(10),
       width: 210,
       height: 120,
       decoration: BoxDecoration(
-        color: Color(0xffD8D8D8),
+        color: const Color(0xffD8D8D8),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -197,12 +372,7 @@ class HeroPage extends StatelessWidget {
         children: [
           Text(
             text,
-            style: TextStyle(
-              fontFamily: "Poppins",
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.black,
-            ),
+            style: const TextStyle(fontFamily: "Poppins", fontSize: 20),
           ),
         ],
       ),

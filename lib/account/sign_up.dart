@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hortimize/account/login.dart';
+import 'package:hortimize/account/user_profile_setup.dart';
 import 'package:hortimize/hero_page/hero_page.dart';
+import 'package:hortimize/services/auth_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -10,155 +13,187 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
+  String _errorMessage = '';
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    try {
+      // Sign in with Google
+      final UserCredential userCredential = await _authService.signInWithGoogle();
+      final User? user = userCredential.user;
+
+      if (user == null) {
+        setState(() {
+          _errorMessage = 'Failed to sign in with Google';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Check if the user is already registered in Firestore
+      final bool isRegistered = await _authService.isUserRegistered(user.uid);
+
+      if (mounted) {
+        if (isRegistered) {
+          // User is already registered, go to home page
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const HeroPage()),
+            (route) => false,
+          );
+        } else {
+          // New user, go to profile setup page
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => UserProfileSetup(user: user),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                  "asset/images/homescreen.jpeg"), // Background Image
-              fit: BoxFit.cover,
-            ),
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("asset/images/homescreen.jpeg"),
+            fit: BoxFit.cover,
           ),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 70, left: 30, right: 30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "Create Account",
-                  style: TextStyle(
-                      fontSize: 24,
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Create Account",
+                    style: TextStyle(
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: const Color.fromARGB(255, 0, 0, 0),
-                      fontFamily: "Poppins"),
-                ),
-                SizedBox(height: 30),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Phone Number",
-                    style: TextStyle(fontFamily: "Poppins", fontSize: 20),
-                  ),
-                ),
-                SizedBox(height: 7),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "Phone Number",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white,
+                      fontFamily: "Poppins",
                     ),
                   ),
-                ),
-                SizedBox(height: 30),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Name",
-                    style: TextStyle(fontFamily: "Poppins", fontSize: 20),
-                  ),
-                ),
-                SizedBox(height: 7),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "Full Name",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  const SizedBox(height: 24),
+                  const Text(
+                    "Join Hortimize to optimize your farming and maximize profits",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontFamily: "Poppins",
                     ),
                   ),
-                ),
-                SizedBox(height: 30),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "location",
-                    style: TextStyle(fontFamily: "Poppins", fontSize: 20),
-                  ),
-                ),
-                SizedBox(height: 7),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "Current Location",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  const SizedBox(height: 50),
+                  
+                  // Google Sign In Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _signInWithGoogle,
+                      icon: Image.asset(
+                        'asset/images/google_logo.png',
+                        height: 24,
+                        width: 24,
+                        errorBuilder: (context, error, stackTrace) => 
+                          const Icon(Icons.g_mobiledata, size: 24),
+                      ),
+                      label: const Text(
+                        "Continue with Google",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 30),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Password",
-                    style: TextStyle(fontFamily: "Poppins", fontSize: 20),
-                  ),
-                ),
-                SizedBox(height: 7),
-                TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Create Strong Password",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  
+                  if (_errorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        _errorMessage,
+                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  
+                  if (_isLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 24),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  
+                  const SizedBox(height: 40),
+                  
+                  // Login Text
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                        );
+                      },
+                      child: const Text.rich(
+                        TextSpan(
+                          text: "Already have an account? ",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: "Log in",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 25),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HeroPage(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                  ),
-                  child: Text(
-                    "Sign Up",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
-                SizedBox(height: 10),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoginPage(),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Already have an account?",
-                        style: TextStyle(color: Colors.white, fontSize: 15),
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text(
-                        "Log in",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
