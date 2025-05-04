@@ -32,3 +32,4 @@ const TextStyle bodyStyle = TextStyle(
 
 // API Keys - Replace with actual keys in production
 const String openWeatherMapApiKey = "YOUR_OPENWEATHERMAP_API_KEY"; 
+const String openAIApiKey = "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"; 

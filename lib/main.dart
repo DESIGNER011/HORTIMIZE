@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hortimize/auth/auth_wrapper.dart';
 import 'package:hortimize/providers/community_provider.dart';
+import 'package:hortimize/providers/openai_provider.dart';
 import 'package:hortimize/services/firebase_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hortimize/firebase_test.dart';
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CommunityProvider()),
+        ChangeNotifierProvider(create: (_) => OpenAIProvider()),
       ],
       child: MaterialApp(
         title: 'Hortimize',

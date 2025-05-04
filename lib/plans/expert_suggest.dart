@@ -2,12 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:hortimize/climate/climate.dart';
 import 'package:hortimize/hero_page/hero_page.dart';
 import 'package:hortimize/market_demand/market_demand.dart';
+import 'package:hortimize/providers/openai_provider.dart';
+import 'package:provider/provider.dart';
 
-class ExpertSuggestionsPage extends StatelessWidget {
+class ExpertSuggestionsPage extends StatefulWidget {
   const ExpertSuggestionsPage({super.key});
 
   @override
+  State<ExpertSuggestionsPage> createState() => _ExpertSuggestionsPageState();
+}
+
+class _ExpertSuggestionsPageState extends State<ExpertSuggestionsPage> {
+  final TextEditingController _questionController = TextEditingController();
+
+  @override
+  void dispose() {
+    _questionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final openAIProvider = Provider.of<OpenAIProvider>(context);
+    
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -35,96 +52,160 @@ class ExpertSuggestionsPage extends StatelessWidget {
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        padding: EdgeInsets.all(30),
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage("asset/images/homescreen.jpeg"),
             fit: BoxFit.cover,
           ),
         ),
-        child: Container(
-          height: double.infinity,
-          width: double.infinity,
-          padding: EdgeInsets.all(30),
-          decoration: BoxDecoration(
-            color: Color(0xffd8d8d8),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 20),
-              const Text(
-                '"Ask an Expert"',
-                style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SafeArea(
+            child: Card(
+              elevation: 0,
+              color: Color(0xffd8d8d8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      '"Ask an Expert"',
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'User',
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xffb6c5c1),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      child: TextField(
+                        controller: _questionController,
+                        decoration: InputDecoration(
+                          hintText: 'Ask about farming, crops, market trends in Tamil Nadu...',
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(fontSize: 14, fontFamily: "Poppins"),
+                        ),
+                        style: TextStyle(fontSize: 14, fontFamily: "Poppins"),
+                        maxLines: 3,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_questionController.text.isNotEmpty) {
+                          // Get expert suggestion through OpenAI
+                          await openAIProvider.getExpertSuggestion(_questionController.text);
+                          // Hide keyboard
+                          FocusScope.of(context).unfocus();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xff4CAF50),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text(
+                        'Submit',
+                        style: TextStyle(fontFamily: "Poppins"),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    Text(
+                      'Expert',
+                      style: TextStyle(
+                        fontSize: 16, 
+                        fontFamily: "Poppins",
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xffb6c5c1),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: openAIProvider.isLoading
+                            ? Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(
+                                      color: Colors.green,
+                                    ),
+                                    SizedBox(height: 12),
+                                    Text(
+                                      'Getting expert advice...',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : openAIProvider.error.isNotEmpty
+                                ? Padding(
+                                    padding: const EdgeInsets.all(15.0),
+                                    child: Text(
+                                      openAIProvider.error,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  )
+                                : openAIProvider.suggestion.isNotEmpty
+                                    ? Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: SingleChildScrollView(
+                                          physics: BouncingScrollPhysics(),
+                                          child: Text(
+                                            openAIProvider.suggestion,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontFamily: "Poppins",
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: Text(
+                                          'Ask a question to get expert advice on farming, crop markets, and climate in Tamil Nadu.',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontFamily: "Poppins",
+                                          ),
+                                        ),
+                                      ),
+                      ),
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 30),
-              const Text(
-                'User',
-                style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                    color: Color(0xffb6c5c1),
-                    borderRadius: BorderRadius.circular(7)),
-                child: Text(
-                  'Users can submit their questions. Farmers can engage with expert responses.',
-                  style: TextStyle(fontSize: 14, fontFamily: "Poppins"),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // TextFormField(
-              //   decoration: const InputDecoration(
-              //     labelText: 'Enter your question',
-              //     border: OutlineInputBorder(),
-              //     contentPadding:
-              //         EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-              //   ),
-              //   maxLines: 4,
-              // ),
-
-              ElevatedButton(
-                onPressed: () {
-                  // Handle submit action
-                },
-                style: ElevatedButton.styleFrom(
-                  //padding: const EdgeInsets.symmetric(vertical: 15),
-                  backgroundColor: Color(0xffd8d8d8),
-                ),
-                child: const Text('Submit'),
-              ),
-              const SizedBox(height: 30),
-
-              Text(
-                'Expert',
-                style: TextStyle(fontSize: 16, fontFamily: "Poppins"),
-              ),
-
-              const SizedBox(height: 10),
-              Container(
-                padding: EdgeInsets.all(20),
-                height: 130,
-                decoration: BoxDecoration(
-                    color: Color(0xffb6c5c1),
-                    borderRadius: BorderRadius.circular(7)),
-                child: Text(
-                  'Suggestion',
-                  style: TextStyle(fontSize: 14, fontFamily: "Poppins"),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-            ],
+            ),
           ),
         ),
       ),
@@ -150,23 +231,11 @@ class ExpertSuggestionsPage extends StatelessWidget {
                     false, // This removes all previous routes from the stack
               );
             } else if (index == 1) {
-              // Navigator.pushAndRemoveUntil(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => HeroPage()),
-              //   (route) =>
-              //       false, // This removes all previous routes from the stack
-              // );
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => MarketDemandPage()));
             } else if (index == 2) {
               Navigator.pop(context);
             } else if (index == 3) {
-              // Navigator.pushAndRemoveUntil(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => HeroPage()),
-              //   (route) =>
-              //       false, // This removes all previous routes from the stack
-              // );
               Navigator.push(
                   context, MaterialPageRoute(builder: (context) => Climate()));
             }
