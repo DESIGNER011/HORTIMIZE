@@ -30,6 +30,10 @@ const TextStyle bodyStyle = TextStyle(
   color: textColor,
 );
 
-// API Keys - Replace with actual keys in production
+// API Keys - DO NOT hardcode API keys here in production
+// Use environment variables or secure storage options
 const String openWeatherMapApiKey = "YOUR_OPENWEATHERMAP_API_KEY"; 
-const String openAIApiKey = "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"; 
+const String openAIApiKey = "YOUR_OPENAI_API_KEY"; 
+
+// For development, create a local_constants.dart file that is in .gitignore
+// and import those keys from there 

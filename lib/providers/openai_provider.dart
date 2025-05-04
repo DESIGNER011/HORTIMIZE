@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hortimize/constants.dart';
 import 'package:hortimize/services/openai_service.dart';
+// Import local constants if available, otherwise use placeholders
+import 'package:hortimize/local_constants.dart' as local;
 
 class OpenAIProvider extends ChangeNotifier {
   // Using a mock response for testing if API has issues
   final bool _useMockResponse = true; // Set to true as API has quota exceeded
   
-  final String _apiKey = openAIApiKey;
+  // Try to use the local API key, fall back to the placeholder if not available
+  late final String _apiKey;
   
   late final OpenAIService _openAIService;
   
@@ -20,6 +23,14 @@ class OpenAIProvider extends ChangeNotifier {
   String get error => _error;
   
   OpenAIProvider() {
+    try {
+      // Try to use the local API key
+      _apiKey = local.localOpenAIApiKey;
+    } catch (e) {
+      // Fall back to the placeholder if the local_constants.dart is not available
+      _apiKey = openAIApiKey;
+    }
+    
     _openAIService = OpenAIService(apiKey: _apiKey);
   }
   
