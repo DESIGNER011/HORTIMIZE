@@ -1,0 +1,80 @@
+{
+  "commodities": [
+    {
+      "name": "Tomato",
+      "unit": "kg",
+      "price_by_region": {
+        "Chennai": 40,
+        "Madurai": 38,
+        "Coimbatore": 35,
+        "Salem": 32,
+        "Trichy": 30
+      },
+      "demand_ranking": ["Chennai", "Madurai", "Coimbatore", "Salem", "Trichy"],
+      "price_trend": {
+        "January": 32,
+        "February": 34,
+        "March": 35,
+        "April": 38,
+        "May": 40
+      }
+    },
+    {
+      "name": "Rice",
+      "unit": "kg",
+      "price_by_region": {
+        "Thanjavur": 55,
+        "Chennai": 53,
+        "Madurai": 50,
+        "Erode": 48,
+        "Trichy": 45
+      },
+      "demand_ranking": ["Thanjavur", "Chennai", "Madurai", "Erode", "Trichy"],
+      "price_trend": {
+        "January": 45,
+        "February": 47,
+        "March": 49,
+        "April": 52,
+        "May": 55
+      }
+    },
+    {
+      "name": "Onion",
+      "unit": "kg",
+      "price_by_region": {
+        "Chennai": 28,
+        "Erode": 26,
+        "Trichy": 25,
+        "Madurai": 24,
+        "Coimbatore": 22
+      },
+      "demand_ranking": ["Chennai", "Erode", "Trichy", "Madurai", "Coimbatore"],
+      "price_trend": {
+        "January": 22,
+        "February": 24,
+        "March": 26,
+        "April": 27,
+        "May": 28
+      }
+    },
+    {
+      "name": "Potato",
+      "unit": "kg",
+      "price_by_region": {
+        "Madurai": 33,
+        "Chennai": 32,
+        "Trichy": 30,
+        "Erode": 28,
+        "Salem": 27
+      },
+      "demand_ranking": ["Madurai", "Chennai", "Trichy", "Erode", "Salem"],
+      "price_trend": {
+        "January": 27,
+        "February": 29,
+        "March": 30,
+        "April": 32,
+        "May": 33
+      }
+    }
+  ]
+}
