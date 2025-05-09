@@ -76,8 +76,10 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // Sign in with Google
-      final UserCredential userCredential = await _authService.signInWithGoogle();
-      final User? user = userCredential.user;
+      final UserCredential? userCredential = await _authService.signInWithGoogle();
+      
+      // Get the user from credential or directly from FirebaseAuth
+      User? user = userCredential?.user ?? FirebaseAuth.instance.currentUser;
 
       if (user == null) {
         setState(() {

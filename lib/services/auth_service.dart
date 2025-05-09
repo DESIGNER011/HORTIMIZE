@@ -5,11 +5,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:hortimize/services/firebase_service.dart';
+import 'package:hortimize/services/google_sign_in_helper.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignInHelper _googleSignInHelper = GoogleSignInHelper();
   
   // Timeouts
   static const Duration _operationTimeout = Duration(seconds: 15);
@@ -84,33 +86,21 @@ class AuthService {
         throw Exception('No internet connection. Please check your network and try again.');
       }
       
-      // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn()
-          .timeout(_operationTimeout, onTimeout: () {
-        throw TimeoutException('Google sign-in timed out. Please try again.');
-      });
+      // Use the helper class for safer Google Sign-In handling
+      UserCredential? userCredential = await _googleSignInHelper.signInWithGoogle();
       
-      if (googleUser == null) {
+      // Check if we have a successful sign in
+      if (userCredential == null) {
+        // If helper returned null but we have a current user, create a simulated UserCredential
+        if (_auth.currentUser != null) {
+          debugPrint('Using current Firebase user that was authenticated');
+          // We're already authenticated, this is fine to continue with
+          // Return a placeholder UserCredential that wraps the current user
+          return PlaceholderUserCredential(_auth.currentUser!);
+        }
+        
         throw Exception('Google sign in aborted by user');
       }
-
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication
-          .timeout(_operationTimeout, onTimeout: () {
-        throw TimeoutException('Google authentication timed out. Please try again.');
-      });
-
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Sign in to Firebase with the credential
-      final userCredential = await _auth.signInWithCredential(credential)
-          .timeout(_firebaseTimeout, onTimeout: () {
-        throw TimeoutException('Firebase authentication timed out. Please try again.');
-      });
       
       return userCredential;
     } on FirebaseAuthException catch (e) {
@@ -231,17 +221,11 @@ class AuthService {
       // No need to check connectivity for sign out, as we want to allow
       // users to sign out even if offline (clears local auth state)
       
-      // Try sign out from Google first, but don't block if it fails
+      // Try sign out using the helper class
       try {
-        await _googleSignIn.signOut().timeout(
-          Duration(seconds: 5),
-          onTimeout: () {
-            debugPrint('Google sign out timed out, continuing with Firebase signout');
-            return;
-          }
-        );
+        await _googleSignInHelper.signOut();
       } catch (e) {
-        debugPrint('Error with Google sign out: $e');
+        debugPrint('Error with Google sign out via helper: $e');
         // Continue with Firebase sign-out even if Google sign-out fails
       }
       
@@ -327,4 +311,28 @@ class AuthService {
   String getFirebaseErrorMessage(FirebaseException e) {
     return 'Firebase error: ${e.message ?? e.code}';
   }
+}
+
+// Add this class at the end of the file, after all other methods:
+
+// A placeholder UserCredential that can be used when we can't get a real UserCredential
+// but the user is already authenticated
+class PlaceholderUserCredential implements UserCredential {
+  final User _user;
+  
+  PlaceholderUserCredential(this._user);
+  
+  @override
+  User get user => _user;
+  
+  @override
+  AdditionalUserInfo? get additionalUserInfo => null;
+  
+  @override
+  AuthCredential? get credential => null;
+  
+  // Firebase Auth doesn't expose OperationType in all versions
+  // So we'll use dynamic to avoid compilation errors
+  @override
+  dynamic get operationType => null;
 } 
